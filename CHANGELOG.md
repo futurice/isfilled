@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.4
+-----
+
+Changes:
+ - bugfix fields/exclusions usage
+
 0.3
 -----
 

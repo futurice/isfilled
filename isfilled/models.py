@@ -16,13 +16,18 @@ class Fill(models.Model):
     fields = models.CharField(max_length=255, null=True, blank=True)
     exclude = models.CharField(max_length=255, null=True, blank=True)
 
+    def str_as_list(self, fld):
+        return filter(None, (getattr(self, fld) or '').split(','))
+
     def fill_model(self):
         fills = import_string(self.fill)
         return fills.form.Meta.model
 
     def form_model(self):
-        f = import_string(self.form)
-        return f.Meta.model
+        return self.using_form().Meta.model
+
+    def using_form(self):
+        return import_string(self.form)
 
     def model_model(self):
         return apps.get_model(self.model)

@@ -6,12 +6,12 @@ class Filled(object):
         self.instance = instance
 
     def default_fields(self):
-        if self.instance.model:
-            res = [k.name for k in self.instance.model_model()._meta.get_fields()]
-        elif self.instance.fill:
+        if self.instance.fill:
             res = self.form().fields.keys()
+        elif self.instance.form:
+            res = self.instance.using_form()().fields.keys()
         else:
-            raise Exception("Something is wrong")
+            res = [k.name for k in self.instance.model_model()._meta.get_fields()]
         return res
 
     def fields(self, keys, exclude=[]):
@@ -42,8 +42,8 @@ class FillsMixin(object):
         registered_model_fills = fills or self.registered_model_fills()
         registered_fills = self.as_fills(registered_model_fills)
         def _fields(fill, instance):
-            return fill.fields(keys=instance.fields or fill.default_fields(),
-                        exclude=instance.exclude or [],)
+            return fill.fields(keys=instance.str_as_list('fields') or fill.default_fields(),
+                               exclude=instance.str_as_list('exclude'))
         def _verify(fill, instance):
             fill_instance = fill(instance=instance) if fill else Filled(instance=instance)
             flds = _fields(fill_instance, instance)

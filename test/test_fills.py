@@ -29,6 +29,11 @@ class EmployeeFillsForm(forms.ModelForm):
         model = Employee
         exclude = []
 
+class EditorForm(forms.ModelForm):
+    class Meta:
+        model = Employee
+        fields = ['editor_of_choice']
+
 class EmployeeFills(Filled):
     form = EmployeeFillsForm
 
@@ -93,6 +98,32 @@ class FillsTest(BaseSuite):
 
         e.editor_of_choice = 'vim'
         e.save()
+
+        state, ctx = e.check_fills()
+        self.assertEqual(state, True)
+
+    def test_selected_form_fills(self):
+        e = Employee.objects.create(name="Jared")
+
+        f = Fill.objects.create(
+                name="employee",
+                form="test.test_fills.EditorForm",)
+
+        state, ctx = e.check_fills()
+        self.assertEqual(state, False)
+
+        e.editor_of_choice = "emacs"
+
+        state, ctx = e.check_fills()
+        self.assertEqual(state, True)
+
+    def test_selected_form_fills_noop(self):
+        e = Employee.objects.create(name="Jared")
+
+        f = Fill.objects.create(
+                name="employee",
+                form="test.test_fills.EditorForm",
+                exclude="editor_of_choice")
 
         state, ctx = e.check_fills()
         self.assertEqual(state, True)

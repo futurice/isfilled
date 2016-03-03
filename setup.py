@@ -23,7 +23,7 @@ install_requires = ['']
 
 setup(
     name = "isfilled",
-    version = "0.3",
+    version = "0.4",
     description = "Filledness for Models and ModelForms",
     url = "http://github.com/futurice/isfilled",
     author = "Jussi Vaihia",
