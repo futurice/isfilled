@@ -8,8 +8,8 @@ Models validate while ModelForms present use-cases. Fills give insight on Model/
 Why?
 ----
 
-People are interested in different details. Create rules to accomodate each. Best used together with (https://github.com/futurice/oncondition)
-to add notifications on fill completions.
+People are interested in different details. Create rules to accomodate each. Best used together with [On Condition](https://github.com/futurice/oncondition)
+to send notifications on fill completions.
 
 Usage
 -----
