@@ -33,7 +33,7 @@ class EmployeeFills(Filled):
     form = EmployeeFillsForm
 
 class FillsTest(BaseSuite):
-    def test_form_fills(self):
+    def test_fills(self):
         e = Employee.objects.create(name="Jared")
 
         f = Fill.objects.create(
@@ -69,3 +69,30 @@ class FillsTest(BaseSuite):
         state, ctx = e.check_fills()
         self.assertEqual(state, True)
 
+    def test_form_fills(self):
+        e = Employee.objects.create(name="Jared")
+
+        f = Fill.objects.create(
+                name="employee",
+                form="test.test_fills.EmployeeFillsForm",)
+
+        state, ctx = e.check_fills()
+        self.assertEqual(state, False)
+
+        e.expert_in = "Android C++ C#"
+        e.save()
+
+        state, ctx = e.check_fills()
+        self.assertEqual(state, False)
+
+        e.starting_date = datetime.date.today()
+        e.save()
+
+        state, ctx = e.check_fills()
+        self.assertEqual(state, False)
+
+        e.editor_of_choice = 'vim'
+        e.save()
+
+        state, ctx = e.check_fills()
+        self.assertEqual(state, True)

@@ -1,6 +1,14 @@
 Changelog
 =========
 
+0.3
+-----
+
+Backwards incompatible with 0.2 due no migrations in place, yet.
+
+Changes:
+ - Fill.form support
+
 0.2
 -----
 

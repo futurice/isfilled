@@ -6,7 +6,7 @@ class Filled(object):
         self.instance = instance
 
     def default_fields(self):
-        if self.instance and self.instance.model:
+        if self.instance.model:
             res = [k.name for k in self.instance.model_model()._meta.get_fields()]
         elif self.instance.fill:
             res = self.form().fields.keys()
