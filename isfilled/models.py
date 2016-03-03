@@ -7,7 +7,7 @@ from django.db.models import Count
 
 from isfilled.util import import_string
 
-class Fills(models.Model):
+class Fill(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=255)
     fill = models.CharField(max_length=255, null=True, blank=True, db_index=True)
@@ -26,7 +26,7 @@ class Fills(models.Model):
         if self.fill and not self.model:
             model = self.fill_model()
             self.model = model._meta.label
-        super(Fills, self).save(*args, **kwargs)
+        super(Fill, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return self.name

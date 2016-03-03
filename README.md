@@ -44,10 +44,10 @@ class EmployeeSkillsFills(Filled):
 Create Fills against Model:
 
 ```python
-Fills.objects.create(name="employee-hr",
+Fill.objects.create(name="employee-hr",
                      model="test.Employee",)
 
-Fills.objects.create(name="employee-manager-bob",
+Fill.objects.create(name="employee-manager-bob",
                      model="test.Employee",
                      fields="starting_date, expert_in",)
 ```
@@ -55,10 +55,10 @@ Fills.objects.create(name="employee-manager-bob",
 Create Fills against ModelForm:
 
 ```python
-Fills.objects.create(name="employee-hr",
+Fill.objects.create(name="employee-hr",
                      fill="test.test_fills.EmployeeFills",)
 
-Fills.objects.create(name="employee-team",
+Fill.objects.create(name="employee-team",
                      fill="test.test_fills.EmployeeSkillsFills",)
 ```
 

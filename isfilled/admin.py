@@ -1,9 +1,9 @@
 from django.conf import settings
 from django.contrib import admin
 
-from isfilled.models import Fills
+from isfilled.models import Fill
 
-class FillsAdmin(admin.ModelAdmin):
+class FillAdmin(admin.ModelAdmin):
     list_display = ['name', 'fill', 'model',]
 
-admin.site.register(Fills, FillsAdmin)
+admin.site.register(Fill, FillAdmin)

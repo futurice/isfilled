@@ -9,7 +9,7 @@ from django.test.client import Client
 from django.contrib.auth.models import Group, User
 from django import forms
 
-from isfilled.models import Fills
+from isfilled.models import Fill
 from isfilled.fills import FillsMixin, Filled
 
 import os, logging, datetime
@@ -36,7 +36,7 @@ class FillsTest(BaseSuite):
     def test_form_fills(self):
         e = Employee.objects.create(name="Jared")
 
-        f = Fills.objects.create(
+        f = Fill.objects.create(
                 name="employee-hr",
                 fill="test.test_fills.EmployeeFills",)
 
@@ -54,7 +54,7 @@ class FillsTest(BaseSuite):
     def test_model_fills(self):
         e = Employee.objects.create(name="Jared")
 
-        f = Fills.objects.create(
+        f = Fill.objects.create(
                 name="employee",
                 model="test.Employee",)
 

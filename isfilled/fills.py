@@ -1,4 +1,4 @@
-from isfilled.models import Fills
+from isfilled.models import Fill
 from isfilled.util import import_string
 
 class Filled(object):
@@ -33,7 +33,7 @@ class FillsMixin(object):
     """ Fills superpowers for Models """
 
     def registered_model_fills(self):
-        return Fills.objects.filter(model=self._meta.label)
+        return Fill.objects.filter(model=self._meta.label)
 
     def as_fills(self, fills):
         return [import_string(fill.fill) if fill.fill else None for fill in fills]
