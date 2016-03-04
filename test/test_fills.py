@@ -35,6 +35,7 @@ class EditorForm(forms.ModelForm):
         fields = ['editor_of_choice']
 
 class EmployeeFills(Filled):
+    name = 'employee-fills'
     form = EmployeeFillsForm
 
 class FillsTest(BaseSuite):
@@ -127,3 +128,31 @@ class FillsTest(BaseSuite):
 
         state, ctx = e.check_fills()
         self.assertEqual(state, True)
+
+    def test_model_is_filled(self):
+        e = Employee.objects.create(name="Jared")
+        self.assertFalse(e.is_filled())
+        e.expert_in = "Android C++ C#"
+        e.starting_date = datetime.date.today()
+        e.editor_of_choice = 'vim'
+        self.assertTrue(e.is_filled())
+
+    def test_model_is_filled_given_a_form(self):
+        e = Employee.objects.create(name="Jared")
+        self.assertFalse(e.is_filled(form=EmployeeFillsForm))
+        e.expert_in = "Android C++ C#"
+        e.starting_date = datetime.date.today()
+        e.editor_of_choice = 'vim'
+        self.assertTrue(e.is_filled())
+
+    def test_model_is_filled_given_a_fill(self):
+        e = Employee.objects.create(name="Jared")
+
+        f = Fill.objects.create(fill="test.test_fills.EmployeeFills", exclude="editor_of_choice")
+
+        self.assertFalse(e.is_filled(fill=EmployeeFills))
+
+        e.expert_in = "Android C++ C#"
+        e.starting_date = datetime.date.today()
+        self.assertTrue(e.is_filled(fill=EmployeeFills))
+

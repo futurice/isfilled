@@ -1,2 +1,2 @@
 graft isfilled
-global-exclude *pyc
+global-exclude *.pyc

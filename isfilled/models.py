@@ -19,9 +19,9 @@ class Fill(models.Model):
     def str_as_list(self, fld):
         return filter(None, (getattr(self, fld) or '').split(','))
 
-    def fill_model(self):
-        fills = import_string(self.fill)
-        return fills.form.Meta.model
+    def fill_model(self, fill=None):
+        fill = fill or import_string(self.fill)
+        return fill.form.Meta.model
 
     def form_model(self):
         return self.using_form().Meta.model
@@ -33,11 +33,17 @@ class Fill(models.Model):
         return apps.get_model(self.model)
 
     def save(self, *args, **kwargs):
-        if self.fill and not self.model:
-            self.model = self.fill_model()._meta.label
+        if self.fill:
+            fi = import_string(self.fill)
+            self.name = fi.name
+            if not self.model:
+                self.model = self.fill_model(fi)._meta.label
         if self.form and not self.model:
             self.model = self.form_model()._meta.label
         super(Fill, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return self.name
+
+    class Meta:
+        unique_together = (('name','model'),)
