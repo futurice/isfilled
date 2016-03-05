@@ -29,6 +29,11 @@ class EmployeeFillsForm(forms.ModelForm):
         model = Employee
         exclude = []
 
+class EmployeeFillsExcludeForm(forms.ModelForm):
+    class Meta:
+        model = Employee
+        exclude = ['editor_of_choice','starting_date',]
+
 class EditorForm(forms.ModelForm):
     class Meta:
         model = Employee
@@ -38,7 +43,16 @@ class EmployeeFills(Filled):
     name = 'employee-fills'
     form = EmployeeFillsForm
 
+class EmployeeExpertFills(Filled):
+    form = EmployeeFillsForm
+    fields = ['expert_in',]
+
+class EmployeeExpertExcludeFills(Filled):
+    form = EmployeeFillsForm
+    exclude = ['expert_in',]
+
 class FillsTest(BaseSuite):
+
     def test_fills(self):
         e = Employee.objects.create(name="Jared")
 
@@ -46,16 +60,14 @@ class FillsTest(BaseSuite):
                 name="employee-hr",
                 fill="test.test_fills.EmployeeFills",)
 
-        state, ctx = e.check_fills()
-        self.assertEqual(state, False)
+        self.assertEqual(e.check_fills().state, False)
 
         e.expert_in = "iOS"
         e.starting_date = datetime.date.today()
         e.editor_of_choice = 'vim'
         e.save()
 
-        state, ctx = e.check_fills()
-        self.assertEqual(state, True)
+        self.assertEqual(e.check_fills().state, True)
 
     def test_model_fills(self):
         e = Employee.objects.create(name="Jared")
@@ -64,16 +76,14 @@ class FillsTest(BaseSuite):
                 name="employee",
                 model="test.Employee",)
 
-        state, ctx = e.check_fills()
-        self.assertEqual(state, False)
+        self.assertEqual(e.check_fills().state, False)
 
         e.expert_in = "Android C++ C#"
         e.starting_date = datetime.date.today()
         e.editor_of_choice = 'vim'
         e.save()
 
-        state, ctx = e.check_fills()
-        self.assertEqual(state, True)
+        self.assertEqual(e.check_fills().state, True)
 
     def test_form_fills(self):
         e = Employee.objects.create(name="Jared")
@@ -82,26 +92,22 @@ class FillsTest(BaseSuite):
                 name="employee",
                 form="test.test_fills.EmployeeFillsForm",)
 
-        state, ctx = e.check_fills()
-        self.assertEqual(state, False)
+        self.assertEqual(e.check_fills().state, False)
 
         e.expert_in = "Android C++ C#"
         e.save()
 
-        state, ctx = e.check_fills()
-        self.assertEqual(state, False)
+        self.assertEqual(e.check_fills().state, False)
 
         e.starting_date = datetime.date.today()
         e.save()
 
-        state, ctx = e.check_fills()
-        self.assertEqual(state, False)
+        self.assertEqual(e.check_fills().state, False)
 
         e.editor_of_choice = 'vim'
         e.save()
 
-        state, ctx = e.check_fills()
-        self.assertEqual(state, True)
+        self.assertEqual(e.check_fills().state, True)
 
     def test_selected_form_fills(self):
         e = Employee.objects.create(name="Jared")
@@ -110,13 +116,11 @@ class FillsTest(BaseSuite):
                 name="employee",
                 form="test.test_fills.EditorForm",)
 
-        state, ctx = e.check_fills()
-        self.assertEqual(state, False)
+        self.assertEqual(e.check_fills().state, False)
 
         e.editor_of_choice = "emacs"
 
-        state, ctx = e.check_fills()
-        self.assertEqual(state, True)
+        self.assertEqual(e.check_fills().state, True)
 
     def test_selected_form_fills_noop(self):
         e = Employee.objects.create(name="Jared")
@@ -126,8 +130,7 @@ class FillsTest(BaseSuite):
                 form="test.test_fills.EditorForm",
                 exclude="editor_of_choice")
 
-        state, ctx = e.check_fills()
-        self.assertEqual(state, True)
+        self.assertEqual(e.check_fills().state, True)
 
     def test_model_is_filled(self):
         e = Employee.objects.create(name="Jared")
@@ -143,7 +146,13 @@ class FillsTest(BaseSuite):
         e.expert_in = "Android C++ C#"
         e.starting_date = datetime.date.today()
         e.editor_of_choice = 'vim'
-        self.assertTrue(e.is_filled())
+        self.assertTrue(e.is_filled(form=EmployeeFillsForm))
+
+    def test_model_is_filled_given_a_form_exclude(self):
+        e = Employee.objects.create(name="Jared")
+        self.assertFalse(e.is_filled(form=EmployeeFillsExcludeForm))
+        e.expert_in = "Android C++ C#"
+        self.assertTrue(e.is_filled(form=EmployeeFillsExcludeForm))
 
     def test_model_is_filled_given_a_fill(self):
         e = Employee.objects.create(name="Jared")
@@ -156,3 +165,18 @@ class FillsTest(BaseSuite):
         e.starting_date = datetime.date.today()
         self.assertTrue(e.is_filled(fill=EmployeeFills))
 
+    def test_model_is_filled_given_a_fill_expert_fields(self):
+        e = Employee.objects.create(name="Jared")
+        self.assertFalse(e.is_filled(fill=EmployeeExpertFills))
+        e.expert_in = "food"
+        self.assertTrue(e.is_filled(fill=EmployeeExpertFills))
+
+    def test_model_is_filled_given_a_fill_expert_exclude(self):
+        e = Employee.objects.create(name="Jared")
+        self.assertFalse(e.is_filled(fill=EmployeeExpertExcludeFills))
+        e.expert_in = "food"
+        self.assertFalse(e.is_filled(fill=EmployeeExpertExcludeFills))
+        e.editor_of_choice = 'vim'
+        e.expert_in = None
+        e.starting_date = datetime.date.today()
+        self.assertTrue(e.is_filled(fill=EmployeeExpertExcludeFills))

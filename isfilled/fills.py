@@ -4,12 +4,9 @@ from isfilled.models import Fill
 from isfilled.util import import_string
 
 class Filled(object):
-    """
-    Configured with a name AND a ModelForm/Model
-    """
     name = None
-    fields = None
-    exclude = ""
+    fields = []
+    exclude = []
 
     def __init__(self, instance=None):
         self.instance = instance
@@ -23,7 +20,7 @@ class Filled(object):
             res = self.get_model_fields(self.instance.model_model())
         return res
 
-    def fields(self, keys, exclude=[]):
+    def using_fields(self, keys, exclude=[]):
         return list(set(keys) - set(exclude))
 
     def is_field_filled(self, instance, field):
@@ -50,7 +47,6 @@ class Filled(object):
     def str_as_list(self, fld):
         return filter(None, (fld or '').split(','))
 
-
 class FillsMixin(object):
     """ Fills superpowers for Models """
 
@@ -59,7 +55,7 @@ class FillsMixin(object):
         registered_model_fills = fills or dummy.registered_model_fills()
         registered_fills = dummy.as_fills(registered_model_fills)
         def _fields(fill, instance):
-            return fill.fields(keys=instance.str_as_list('fields') or fill.default_fields(),
+            return fill.using_fields(keys=instance.str_as_list('fields') or fill.default_fields(),
                                exclude=instance.str_as_list('exclude'))
         def _verify(fill, instance):
             fill_instance = fill(instance=instance) if fill else Filled(instance=instance)
@@ -68,25 +64,23 @@ class FillsMixin(object):
 
         ctxs = {fill: _verify(fill, ins) for fill, ins in 
                     zip(registered_fills, registered_model_fills)}
-        return (all(ctxs.values()), ctxs)
+        return type('Result', (object,), {'state': all(ctxs.values()), 'contexts': ctxs})
 
-    def is_filled(self, form=None, fill=None): # fill = class
+    def is_filled(self, form=None, fill=None):
         dummy = Filled(instance=self)
         if form is None and fill is None:
             fields = dummy.get_model_fields(self)
         elif form:
             fields = dummy.get_form_fields(form)
-            # TODO: Meta.fields, Meta.exclude
         elif fill:
-            # DB provides run-time overrides (optional)
             try:
                 db = Fill.objects.get(name=fill.name,
                                       model=fill.form.Meta.model._meta.label)
             except ObjectDoesNotExist:
                 db = None
-            fields = dummy.fields(
-                    (dummy.str_as_list(db.fields) if db else None) or dummy.get_form_fields(fill.form),
-                    (dummy.str_as_list(db.exclude) if db else None) or fill.exclude,)
+            fields = dummy.using_fields(
+                    (dummy.str_as_list(db.fields) if db else fill.fields) or dummy.get_form_fields(fill.form),
+                    (dummy.str_as_list(db.exclude) if db else fill.exclude) or fill.exclude,)
         else:
             raise Exception("The impossible happened")
 

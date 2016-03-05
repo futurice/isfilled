@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.5
+-----
+
+Changes:
+ - check_fills() now returns an object
+
 0.4
 -----
 
